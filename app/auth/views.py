@@ -4,12 +4,19 @@ from flask_login import login_user, logout_user, login_required, \
 from . import auth
 from .. import db
 from ..models import User
-from ..email import send_email
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, ResetForm
+from .. import mail
+from flask import current_app
+from flask_mail import Message
+import os
 
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        flash(u'你已经登陆了！', 'info')
+        return redirect(url_for('main.index'))
+
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
@@ -22,12 +29,38 @@ def login():
         flash('用户名或密码错误！')
     return render_template('auth/login.html', form=form)
 
+@auth.route('/reset', methods=['GET', 'POST'])
+def reset():
+    app = current_app._get_current_object() # 获取当前的对象
+    form = ResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data.lower()).first()
+        if user is None:
+            flash("邮箱不存在")
+        else:
+            msg = Message('重置密码', sender=os.environ.get('MAIL_USERNAME'), recipients=[user.email])
+            msg.body = '重置密码'
+            new_password = '666666'
+            msg.html = '新密码是:{}'.format(new_password)
+            try:
+                with app.app_context():
+                    mail.send(msg)
+                user.password = new_password
+                db.session.add(user)
+                db.session.commit()
+                flash('已发送邮件!')
+                return redirect(url_for('auth.login'))
+            except :
+                flash('发生错误！')
+        
+    return render_template('auth/reset.html', form=form)
+
 
 @auth.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out.')
+    flash('你已成功退出.')
     return redirect(url_for('main.index'))
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -35,10 +68,10 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(email=form.email.data.lower(),
-                    username=form.username.data,
+                    nickname=form.nickname.data,
                     password=form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('You can now login.')
+        flash('你现在可以登陆了！')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)

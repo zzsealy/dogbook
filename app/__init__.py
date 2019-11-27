@@ -5,6 +5,7 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from config import config
+from flask_mail import Mail, Message
 
 bootstrap = Bootstrap()
 mail = Mail()

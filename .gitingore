@@ -3,6 +3,6 @@ __pycache__/
 .db
 
 .vscode/
-.idea
+*.idea
 
 
