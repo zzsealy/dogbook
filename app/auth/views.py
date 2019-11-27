@@ -4,11 +4,12 @@ from flask_login import login_user, logout_user, login_required, \
 from . import auth
 from .. import db
 from ..models import User
-from .forms import LoginForm, RegistrationForm, ResetForm
+from .forms import LoginForm, RegistrationForm, ResetForm, ChangePasswordForm
 from .. import mail
 from flask import current_app
 from flask_mail import Message
 import os
+from ..setting import redirect_back
 
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -30,6 +31,7 @@ def login():
     return render_template('auth/login.html', form=form)
 
 @auth.route('/reset', methods=['GET', 'POST'])
+@login_required
 def reset():
     app = current_app._get_current_object() # 获取当前的对象
     form = ResetForm()
@@ -60,7 +62,6 @@ def reset():
 @login_required
 def logout():
     logout_user()
-    flash('你已成功退出.')
     return redirect(url_for('main.index'))
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -75,3 +76,18 @@ def register():
         flash('你现在可以登陆了！')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
+
+@auth.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if current_user.verify_password(form.old_password.data):
+            current_user.password = form.password.data
+            db.session.add(current_user)
+            db.session.commit()
+            flash("你的密码已经被更新！")
+            return redirect(url_for('main.index'))
+        else:
+            flash("旧密码错误！")
+    return render_template("auth/changepassword.html", form=form)
