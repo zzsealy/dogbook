@@ -12,6 +12,7 @@ class Config:
     FLASKY_MAIL_SUBJECT_PREFIX = '' 
     FLASKY_MAIL_SENDER = 'zzsealy'
     FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
+    ADMIN = os.environ.get('ADMIN')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     @staticmethod

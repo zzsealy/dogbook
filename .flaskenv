@@ -9,3 +9,4 @@ MAIL_USE_TLS=False
 MAIL_DEFAULT_SENDER='zzsealy@qq.com'
 MAIL_USERNAME='zzsealy@qq.com'
 MAIL_PASSWORD='pwaoheqkyxwmhffb'
+ADMIN='1147575371@qq.com'

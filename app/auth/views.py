@@ -31,14 +31,13 @@ def login():
     return render_template('auth/login.html', form=form)
 
 @auth.route('/reset', methods=['GET', 'POST'])
-@login_required
 def reset():
     app = current_app._get_current_object() # 获取当前的对象
     form = ResetForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
-        if user is None:
-            flash("邮箱不存在")
+        if not user:
+            flash("用户不存在！")
         else:
             msg = Message('重置密码', sender=os.environ.get('MAIL_USERNAME'), recipients=[user.email])
             msg.body = '重置密码'
@@ -59,9 +58,9 @@ def reset():
 
 
 @auth.route('/logout')
-@login_required
 def logout():
     logout_user()
+    flash("退出登录！")
     return redirect(url_for('main.index'))
 
 @auth.route('/register', methods=['GET', 'POST'])
