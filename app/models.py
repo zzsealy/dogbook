@@ -61,8 +61,6 @@ class Role(db.Model):
     def has_permission(self, perm):
         return self.permissions & perm == perm
 
-    def __repr__(self):
-        return '<Role %r>' % self.name
 
     def __repr__(self):
         return '<Role %r>' % self.name

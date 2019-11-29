@@ -7,9 +7,6 @@ from app.models import User, Role
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 migrate = Migrate(app, db)
 
-
-
-
 @app.shell_context_processor
 def make_shell_context():
     return dict(db=db, User=User, Role=Role)
@@ -36,3 +33,28 @@ def initdb(drop):
         click.echo('数据库已经删除。')
     db.create_all()
     click.echo('数据库重新创建。')
+
+@app.cli.command()
+def init_role():
+    admin = User(email=app.config['ADMIN'], password='123456', nickname='zzsealy')
+    user1 = User(email='18801018976@163.com', password='123456', nickname='18801018976')
+    user2 = User(email='121788297@qq.com', password='123456', nickname='121788297')
+    db.session.add_all([admin, user1, user2])
+    db.session.commit()
+    click.echo('创建角色成功，一个管理员，两个普通用户')
+
+@app.cli.command()
+def gen_permission():
+    Role.insert_roles()
+    admin_role = Role.query.filter_by(name='Administrator').first()
+    default_role = Role.query.filter_by(default=True).first()
+    for u in User.query.all():
+        if u.role is None:
+            if u.email == app.config['ADMIN']:
+                u.role = admin_role
+                db.session.add(u)
+            else:
+                u.role = default_role
+                db.session.add(u)
+    db.session.commit()
+    click.echo('赋予权限成功')
