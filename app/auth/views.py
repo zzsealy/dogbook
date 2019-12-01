@@ -11,6 +11,12 @@ from flask_mail import Message
 import os
 from ..setting import redirect_back
 
+@auth.before_app_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.ping()
+        
+
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
