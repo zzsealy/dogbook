@@ -13,6 +13,7 @@ from ..setting import redirect_back
 
 @auth.before_app_request
 def before_request():
+    # 更新用户最后登录时间j
     if current_user.is_authenticated:
         current_user.ping()
         
