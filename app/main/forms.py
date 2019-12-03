@@ -42,3 +42,8 @@ class EditProfileAdminForm(FlaskForm):
             User.query.filter_by(nickname=field.data).first():
             raise ValidationError('昵称已经被占用！', 'warning')
 
+
+class PostForm(FlaskForm):
+    title =  StringField('标题')
+    body = TextAreaField('内容')
+    submit = SubmitField('提交')
