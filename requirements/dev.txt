@@ -1,3 +1,0 @@
--r common.txt
-faker==2.0.4
-

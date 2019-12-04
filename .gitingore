@@ -1,8 +1,0 @@
-__pycache__/
-
-.db
-.vscode
-.vscode/
-*.idea
-venv/
-
