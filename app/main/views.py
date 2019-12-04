@@ -74,3 +74,29 @@ def edit_profile_admin(id):
     form.role.data = user.role_id
     form.about_me.data = user.about_me
     return render_template('edit_profile.html', form=form, user=user)
+
+
+@main.route('/post/<int:id>')
+def post(id):
+    post = Post.query.get_or_404(id)
+    return render_template('post.html', posts=[post])  # 传入的是列表，为了使用局部模板。
+
+
+#编辑文章的路由
+@main.route('/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit(id):
+    post = Post.query.get_or_404(id)  # 获取文章
+    if  current_user != post.author and not current_user.can(Permission.ADMIN):
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.body = form.body.data
+        db.session.add(post)
+        db.session.commit()
+        flash("文章已经被更新")
+        return redirect(url_for('.post', id=post.id))
+    form.title.data = post.title
+    form.body.data = post.body
+    return render_template('edit_post.html', form=form)
